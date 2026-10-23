@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Administration - AgriBook EGPVS</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.champ{width:100%;padding:10px;margin:6px 0 12px;font-size:16px}
+.petit{padding:8px 14px;font-size:14px;margin:4px 4px 0 0;cursor:pointer}
+.refus{background:#c0392b;color:#fff}
+.st{display:inline-block;padding:2px 8px;border-radius:10px;font-size:12px;font-weight:bold}
+.en_attente{background:var(--jaune)}
+.approuve{background:#2e8b57;color:#fff}
+.refuse{background:#c0392b;color:#fff}
+#admin{display:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌱 Agri<span>Book</span> EGPVS · Administration</div>
+</header>
+
+<section id="connexion">
+  <h2>Connexion</h2>
+  <div class="carte">
+    <label>E-mail<br><input class="champ" type="email" id="mail"></label>
+    <label>Mot de passe<br><input class="champ" type="password" id="mdp"></label>
+    <button class="btn" id="btn-connexion">Se connecter</button>
+    <p id="erreur" style="margin-top:10px;color:#b00020;font-weight:bold"></p>
+  </div>
+</section>
+
+<section id="admin">
+  <h2>Demandes d'inscription</h2>
+  <button class="btn petit" id="btn-actualiser">Actualiser</button>
+  <button class="btn petit" id="btn-deco">Se déconnecter</button>
+  <p id="info" style="margin:12px 0"></p>
+  <div id="liste"></div>
+</section>
+
+<script>
+var URL_SB = "https://akseuarcfbpsqptiluum.supabase.co";
+var CLE = "sb_publishable_T2b-CGqwrIg67wSlm8fmpg_bQgdGb6V";
+var jeton = null;
+
+function $(id){ return document.getElementById(id); }
+
+$("btn-connexion").onclick = async function(){
+  $("erreur").textContent = "Connexion...";
+  try{
+    var r = await fetch(URL_SB + "/auth/v1/token?grant_type=password", {
+      method:"POST",
+      headers:{"apikey":CLE,"Content-Type":"application/json"},
+      body: JSON.stringify({email:$("mail").value.trim(), password:$("mdp").value})
+    });
+    var d = await r.json();
+    if(!r.ok || !d.access_token){ $("erreur").textContent = "E-mail ou mot de passe incorrect."; return; }
+    jeton = d.access_token;
+    $("mdp").value = "";
+    $("erreur").textContent = "";
+    $("connexion").style.display = "none";
+    $("admin").style.display = "block";
+    charger();
+  }catch(e){ $("erreur").textContent = "Pas de connexion Internet."; }
+};
+
+$("btn-deco").onclick = function(){
+  jeton = null;
+  $("liste").innerHTML = "";
+  $("admin").style.display = "none";
+  $("connexion").style.display = "block";
+};
+$("btn-actualiser").onclick = function(){ charger(); };
+
+function entetes(){
+  return {"apikey":CLE, "Authorization":"Bearer " + jeton, "Content-Type":"application/json"};
+}
+
+async function charger(){
+  $("info").textContent = "Chargement...";
+  try{
+    var r = await fetch(URL_SB + "/rest/v1/inscriptions?select=*&order=created_at.desc", {headers:entetes()});
+    if(r.status === 401){ $("info").textContent = "Session expirée. Reconnecte-toi."; return; }
+    if(!r.ok){ $("info").textContent = "Erreur de lecture (code " + r.status + ")."; return; }
+    var lignes = await r.json();
+    $("info").textContent = lignes.length + " demande(s).";
+    afficher(lignes);
+  }catch(e){ $("info").textContent = "Pas de connexion Internet."; }
+}
+
+function lienWhatsApp(num, prenom){
+  var ch = num.replace(/\D/g, "");
+  if(ch.length === 10 && ch.indexOf("01") === 0){ ch = "229" + ch; }
+  return "https://wa.me/" + ch + "?text=" + encodeURIComponent("Bonjour " + prenom + ", c'est l'administrateur d'AgriBook EGPVS.");
+}
+
+function afficher(lignes){
+  var zone = $("liste");
+  zone.innerHTML = "";
+  lignes.forEach(function(l){
+    var c = document.createElement("div");
+    c.className = "carte";
+
+    var t = document.createElement("b");
+    t.textContent = l.prenom + " " + l.nom;
+    c.appendChild(t);
+
+    c.appendChild(document.createTextNode(" "));
+    var s = document.createElement("span");
+    s.className = "st " + l.statut;
+    s.textContent = l.statut.replace("_"," ");
+    c.appendChild(s);
+
+    var det = document.createElement("div");
+    det.style.margin = "6px 0";
+    det.style.fontSize = "14px";
+    det.textContent = l.email + " · " + l.whatsapp + " · " + l.filiere + " · " + l.niveau + " · " + new Date(l.created_at).toLocaleString("fr-FR");
+    c.appendChild(det);
+
+    var b1 = document.createElement("button");
+    b1.className = "btn petit"; b1.textContent = "Approuver";
+    b1.onclick = function(){ changer(l.id, "approuve"); };
+    var b2 = document.createElement("button");
+    b2.className = "btn petit refus"; b2.textContent = "Refuser";
+    b2.onclick = function(){ changer(l.id, "refuse"); };
+    var w = document.createElement("a");
+    w.className = "btn petit"; w.textContent = "WhatsApp";
+    w.target = "_blank"; w.href = lienWhatsApp(l.whatsapp, l.prenom);
+
+    c.appendChild(b1); c.appendChild(b2); c.appendChild(w);
+    zone.appendChild(c);
+  });
+}
+
+async function changer(id, statut){
+  $("info").textContent = "Mise à jour...";
+  try{
+    var h = entetes(); h["Prefer"] = "return=representation";
+    var r = await fetch(URL_SB + "/rest/v1/inscriptions?id=eq." + encodeURIComponent(id), {
+      method:"PATCH", headers:h, body: JSON.stringify({statut:statut})
+    });
+    var d = r.ok ? await r.json() : [];
+    if(r.ok && d.length === 1){ charger(); }
+    else { $("info").textContent = "Échec : la modification n'a pas été enregistrée (code " + r.status + ")."; }
+  }catch(e){ $("info").textContent = "Pas de connexion Internet."; }
+}
+</script>
+
+</body>
+  </html>
