@@ -1,0 +1,22 @@
+:root{
+  --vert:#1F5A3A;
+  --jaune:#F2B705;
+  --blanc:#FFFFFF;
+  --clair:#EEF3EC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;color:#1c2b22;background:var(--blanc);line-height:1.6}
+header{background:var(--vert);color:var(--blanc);padding:14px 16px;position:sticky;top:0}
+.logo{font-size:20px;font-weight:bold}
+.logo span{color:var(--jaune)}
+nav{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+nav a{color:var(--blanc);text-decoration:none;font-size:14px}
+.hero{background:var(--vert);color:var(--blanc);padding:40px 16px;text-align:center}
+.hero h1{font-size:26px;margin-bottom:12px}
+.hero p{margin-bottom:20px}
+.btn{display:inline-block;background:var(--jaune);color:#1c2b22;padding:12px 24px;border-radius:8px;font-weight:bold;text-decoration:none;border:0;font-size:16px}
+section{padding:32px 16px}
+section.clair{background:var(--clair)}
+h2{color:var(--vert);margin-bottom:16px}
+.carte{background:var(--blanc);border-left:5px solid var(--jaune);padding:14px;border-radius:8px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+footer{background:var(--vert);color:var(--blanc);text-align:center;padding:16px;font-size:14px}
