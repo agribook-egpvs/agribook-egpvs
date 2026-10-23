@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Communauté - AgriBook EGPVS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">🌱 Agri<span>Book</span> EGPVS</div>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="bibliotheque.html">Bibliothèque</a>
+    <a href="communaute.html">Communauté</a>
+  </nav>
+</header>
+
+<section>
+  <h2>Le groupe des étudiants</h2>
+  <div class="carte"><b>💬 Entraide</b><br>Pose tes questions et échange avec les autres étudiants de première année.</div>
+  <div class="carte"><b>📢 Informations</b><br>Annonces sur les nouveaux e-books et les mises à jour.</div>
+  <div class="carte"><b>✅ Accès après validation</b><br>Le lien du groupe est envoyé aux étudiants dont l'inscription a été vérifiée.</div>
+  <br>
+  <a id="btn-groupe" class="btn" href="#">Rejoindre le groupe</a>
+  <p id="note" style="margin-top:12px;font-size:14px"></p>
+</section>
+
+<footer>AgriBook EGPVS · Projet étudiant</footer>
+
+<script>
+// Quand tu auras le lien du groupe, colle-le entre les guillemets :
+var LIEN_GROUPE = "";
+var NUMERO = "2290148549637";
+
+var b = document.getElementById("btn-groupe");
+var n = document.getElementById("note");
+if (LIEN_GROUPE) {
+  b.href = LIEN_GROUPE;
+  b.target = "_blank";
+} else {
+  b.textContent = "Me contacter sur WhatsApp";
+  b.href = "https://wa.me/" + NUMERO + "?text=" + encodeURIComponent("Bonjour, je souhaite rejoindre le groupe AgriBook EGPVS.");
+  b.target = "_blank";
+  n.textContent = "Le lien du groupe sera bientôt disponible.";
+}
+</script>
+
+</body>
+</html>
