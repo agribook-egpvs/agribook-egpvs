@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgriBook EGPVS</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="logo">🌱 Agri<span>Book</span> EGPVS</div>
+  <nav>
+    <a href="#accueil">Accueil</a>
+    <a href="#avantages">Avantages</a>
+    <a href="#fonctionnement">Fonctionnement</a>
+    <a href="#inscription">Inscription</a>
+  </nav>
+</header>
+
+<div class="hero" id="accueil">
+  <h1>Les e-books de ta première année, au même endroit</h1>
+  <p>Une bibliothèque numérique pour les étudiants de première année de l'École de gestion et de production végétale et semencière (EGPVS), Université nationale d'agriculture du Bénin.</p>
+  <a class="btn" href="#inscription">Je m'inscris</a>
+</div>
+
+<section id="avantages">
+  <h2>Pourquoi AgriBook ?</h2>
+  <div class="carte"><b>📚 Cours en un seul endroit</b><br>Botanique, biologie végétale, agronomie, sols, production semencière, maths, chimie…</div>
+  <div class="carte"><b>📱 Lisible sur téléphone</b><br>Pensé pour être utilisé facilement depuis ton smartphone.</div>
+  <div class="carte"><b>💬 Groupe d'entraide</b><br>Après validation, tu rejoins le groupe WhatsApp des étudiants.</div>
+</section>
+
+<section class="clair" id="fonctionnement">
+  <h2>Comment ça marche ?</h2>
+  <div class="carte"><b>1.</b> Tu remplis le formulaire d'inscription.</div>
+  <div class="carte"><b>2.</b> Ta demande m'arrive sur WhatsApp.</div>
+  <div class="carte"><b>3.</b> Je vérifie que tu es bien étudiant.</div>
+  <div class="carte"><b>4.</b> Après validation, tu accèdes aux e-books et au groupe.</div>
+</section>
+
+<section id="inscription">
+  <h2>Inscription</h2>
+  <form id="formulaire">
+    <div class="carte">
+      <label>Nom<br><input type="text" id="nom" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
+      <label>Prénom<br><input type="text" id="prenom" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
+      <label>Adresse e-mail<br><input type="email" id="email" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
+      <label>Numéro WhatsApp<br><input type="tel" id="tel" required placeholder="+229 ..." style="width:100%;padding:10px;margin:6px 0 12px"></label>
+      <label>Filière<br><input type="text" id="filiere" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
+      <label>Niveau d'études<br><input type="text" id="niveau" value="Première année" required style="width:100%;padding:10px;margin:6px 0 16px"></label>
+      <button class="btn" type="submit">Envoyer ma demande sur WhatsApp</button>
+      <p style="font-size:13px;margin-top:10px">Ta demande n'est envoyée que lorsque tu appuies sur « Envoyer » dans WhatsApp.</p>
+    </div>
+  </form>
+</section>
+
+<footer>AgriBook EGPVS · Projet étudiant · Les e-books de démonstration ne sont pas des documents officiels de l'UNA.</footer>
+
+<script>
+var NUMERO = "2290148549637";
+document.getElementById("formulaire").addEventListener("submit", function(e){
+  e.preventDefault();
+  var msg = "Demande d'inscription AgriBook EGPVS\n" +
+    "Nom : " + document.getElementById("nom").value + "\n" +
+    "Prénom : " + document.getElementById("prenom").value + "\n" +
+    "E-mail : " + document.getElementById("email").value + "\n" +
+    "WhatsApp : " + document.getElementById("tel").value + "\n" +
+    "Filière : " + document.getElementById("filiere").value + "\n" +
+    "Niveau : " + document.getElementById("niveau").value;
+  window.open("https://wa.me/" + NUMERO + "?text=" + encodeURIComponent(msg), "_blank");
+});
+</script>
+
+</body>
+                         </html>
