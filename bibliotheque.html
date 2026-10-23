@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bibliothèque - AgriBook EGPVS</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.livre{display:flex;gap:12px;align-items:center}
+.couv{min-width:70px;height:95px;background:var(--vert);color:var(--jaune);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.tag{display:inline-block;background:var(--jaune);font-size:11px;padding:2px 8px;border-radius:10px;margin-bottom:4px}
+#lecteur{display:none;padding:10px;background:#ddd}
+#pages canvas{display:block;margin:0 auto 8px;background:#fff}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🌱 Agri<span>Book</span> EGPVS</div>
+  <nav><a href="index.html">Accueil</a><a href="bibliotheque.html">Bibliothèque</a></nav>
+</header>
+
+<section>
+  <h2>Bibliothèque</h2>
+  <p style="margin-bottom:16px">Les documents ci-dessous sont des <b>démonstrations</b>, pas des documents officiels de l'UNA.</p>
+  <div id="liste"></div>
+</section>
+
+<div id="lecteur">
+  <button class="btn" onclick="fermer()">Fermer le lecteur</button>
+  <p id="etat" style="margin:10px 0"></p>
+  <div id="pages"></div>
+</div>
+
+<footer>AgriBook EGPVS · Projet étudiant</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+// MODIFIE CETTE LISTE pour changer les matières et les documents
+var livres = [
+  {titre:"Introduction à la botanique", matiere:"Botanique", icone:"🌿", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Notions de biologie végétale", matiere:"Biologie végétale", icone:"🧬", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Bases de l'agronomie générale", matiere:"Agronomie générale", icone:"🌾", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Science des sols", matiere:"Science des sols", icone:"🪱", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Production semencière", matiere:"Production semencière", icone:"🌱", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Mathématiques et statistiques", matiere:"Maths et statistiques", icone:"📊", description:"Document de démonstration.", fichier:"pdf/demo.pdf"},
+  {titre:"Chimie générale", matiere:"Chimie", icone:"⚗️", description:"Document de démonstration.", fichier:"pdf/demo.pdf"}
+];
+
+var liste = document.getElementById("liste");
+livres.forEach(function(l){
+  var d = document.createElement("div");
+  d.className = "carte livre";
+  d.innerHTML = '<div class="couv">'+l.icone+'</div><div><span class="tag">'+l.matiere+' · DÉMO</span><br><b>'+l.titre+'</b><br><small>'+l.description+'</small><br><br></div>';
+  var b = document.createElement("button");
+  b.className = "btn"; b.textContent = "Lire";
+  b.onclick = function(){ lire(l.fichier); };
+  d.lastChild.appendChild(b);
+  liste.appendChild(d);
+});
+
+function fermer(){
+  document.getElementById("lecteur").style.display = "none";
+  document.getElementById("pages").innerHTML = "";
+}
+
+async function lire(fichier){
+  var zone = document.getElementById("pages");
+  var etat = document.getElementById("etat");
+  document.getElementById("lecteur").style.display = "block";
+  zone.innerHTML = ""; etat.textContent = "Chargement...";
+  document.getElementById("lecteur").scrollIntoView();
+  try{
+    var pdf = await pdfjsLib.getDocument(fichier).promise;
+    etat.textContent = "";
+    for(var i=1;i<=pdf.numPages;i++){
+      var page = await pdf.getPage(i);
+      var base = page.getViewport({scale:1});
+      var vp = page.getViewport({scale: zone.clientWidth / base.width});
+      var c = document.createElement("canvas");
+      c.width = vp.width; c.height = vp.height; c.style.width = "100%";
+      zone.appendChild(c);
+      await page.render({canvasContext:c.getContext("2d"), viewport:vp}).promise;
+    }
+  }catch(e){
+    etat.textContent = "Impossible d'ouvrir ce document (fichier absent ou hors connexion).";
+  }
+}
+</script>
+</body>
+  </html>
