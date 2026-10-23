@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AgriBook EGPVS</title>
 <link rel="stylesheet" href="style.css">
+<style>
+.champ{width:100%;padding:10px;margin:6px 0 12px;font-size:16px}
+#message{margin-top:12px;font-weight:bold}
+</style>
 </head>
 <body>
 
@@ -16,7 +20,7 @@
     <a href="#fonctionnement">Fonctionnement</a>
     <a href="#inscription">Inscription</a>
     <a href="bibliotheque.html">Bibliothèque</a>
-<a href="communaute.html">Communauté</a>
+    <a href="communaute.html">Communauté</a>
   </nav>
 </header>
 
@@ -36,7 +40,7 @@
 <section class="clair" id="fonctionnement">
   <h2>Comment ça marche ?</h2>
   <div class="carte"><b>1.</b> Tu remplis le formulaire d'inscription.</div>
-  <div class="carte"><b>2.</b> Ta demande m'arrive sur WhatsApp.</div>
+  <div class="carte"><b>2.</b> Ta demande est enregistrée.</div>
   <div class="carte"><b>3.</b> Je vérifie que tu es bien étudiant.</div>
   <div class="carte"><b>4.</b> Après validation, tu accèdes aux e-books et au groupe.</div>
 </section>
@@ -45,14 +49,14 @@
   <h2>Inscription</h2>
   <form id="formulaire">
     <div class="carte">
-      <label>Nom<br><input type="text" id="nom" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
-      <label>Prénom<br><input type="text" id="prenom" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
-      <label>Adresse e-mail<br><input type="email" id="email" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
-      <label>Numéro WhatsApp<br><input type="tel" id="tel" required placeholder="+229 ..." style="width:100%;padding:10px;margin:6px 0 12px"></label>
-      <label>Filière<br><input type="text" id="filiere" required style="width:100%;padding:10px;margin:6px 0 12px"></label>
-      <label>Niveau d'études<br><input type="text" id="niveau" value="Première année" required style="width:100%;padding:10px;margin:6px 0 16px"></label>
-      <button class="btn" type="submit">Envoyer ma demande sur WhatsApp</button>
-      <p style="font-size:13px;margin-top:10px">Ta demande n'est envoyée que lorsque tu appuies sur « Envoyer » dans WhatsApp.</p>
+      <label>Nom<br><input class="champ" type="text" id="nom" maxlength="100" required></label>
+      <label>Prénom<br><input class="champ" type="text" id="prenom" maxlength="100" required></label>
+      <label>Adresse e-mail<br><input class="champ" type="email" id="email" maxlength="200" required></label>
+      <label>Numéro WhatsApp<br><input class="champ" type="tel" id="tel" maxlength="30" placeholder="+229 ..." required></label>
+      <label>Filière<br><input class="champ" type="text" id="filiere" maxlength="150" required></label>
+      <label>Niveau d'études<br><input class="champ" type="text" id="niveau" maxlength="100" value="Première année" required></label>
+      <button class="btn" type="submit" id="envoi">Envoyer ma demande</button>
+      <p id="message"></p>
     </div>
   </form>
 </section>
@@ -60,19 +64,59 @@
 <footer>AgriBook EGPVS · Projet étudiant · Les e-books de démonstration ne sont pas des documents officiels de l'UNA.</footer>
 
 <script>
+var SUPABASE_URL = "https://akseuarcfbpsqptiluum.supabase.co";
+var SUPABASE_KEY = "sb_publishable_T2b-CGqwrIg67wSlm8fmpg_bQgdGb6V";
 var NUMERO = "2290148549637";
-document.getElementById("formulaire").addEventListener("submit", function(e){
+
+var form = document.getElementById("formulaire");
+var msg = document.getElementById("message");
+var bouton = document.getElementById("envoi");
+
+form.addEventListener("submit", async function(e){
   e.preventDefault();
-  var msg = "Demande d'inscription AgriBook EGPVS\n" +
-    "Nom : " + document.getElementById("nom").value + "\n" +
-    "Prénom : " + document.getElementById("prenom").value + "\n" +
-    "E-mail : " + document.getElementById("email").value + "\n" +
-    "WhatsApp : " + document.getElementById("tel").value + "\n" +
-    "Filière : " + document.getElementById("filiere").value + "\n" +
-    "Niveau : " + document.getElementById("niveau").value;
-  window.open("https://wa.me/" + NUMERO + "?text=" + encodeURIComponent(msg), "_blank");
+  msg.style.color = "#1c2b22";
+  msg.textContent = "Envoi en cours...";
+  bouton.disabled = true;
+
+  var donnees = {
+    nom: document.getElementById("nom").value.trim(),
+    prenom: document.getElementById("prenom").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    whatsapp: document.getElementById("tel").value.trim(),
+    filiere: document.getElementById("filiere").value.trim(),
+    niveau: document.getElementById("niveau").value.trim()
+  };
+
+  try {
+    var rep = await fetch(SUPABASE_URL + "/rest/v1/inscriptions", {
+      method: "POST",
+      headers: {
+        "apikey": SUPABASE_KEY,
+        "Content-Type": "application/json",
+        "Prefer": "return=minimal"
+      },
+      body: JSON.stringify(donnees)
+    });
+
+    if (rep.ok) {
+      form.reset();
+      document.getElementById("niveau").value = "Première année";
+      msg.style.color = "#1F5A3A";
+      msg.innerHTML = "✅ Ta demande est enregistrée. Elle sera vérifiée avant validation.<br><br>" +
+        '<a class="btn" target="_blank" href="https://wa.me/' + NUMERO + "?text=" +
+        encodeURIComponent("Bonjour, je viens de faire ma demande d'inscription sur AgriBook EGPVS (" + donnees.prenom + " " + donnees.nom + ").") +
+        '">Prévenir l\'administrateur sur WhatsApp</a>';
+    } else {
+      msg.style.color = "#b00020";
+      msg.textContent = "❌ La demande n'a pas pu être enregistrée (code " + rep.status + "). Réessaie plus tard.";
+    }
+  } catch (err) {
+    msg.style.color = "#b00020";
+    msg.textContent = "❌ Pas de connexion. Vérifie ton Internet et réessaie.";
+  }
+  bouton.disabled = false;
 });
 </script>
 
 </body>
-                         </html>
+</html>
